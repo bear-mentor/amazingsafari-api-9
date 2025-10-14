@@ -3,43 +3,29 @@ import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 
 import { db } from "./lib/db";
+import { ProductsSchema } from "./modules/product/schema";
 
 const app = new OpenAPIHono();
 
 app.use(cors());
 
-const getProductsRoute = createRoute({
-  method: "get",
-  path: "/products",
-  responses: {
-    200: {
-      description: "Get all products",
-      content: {
-        "application/json": {
-          schema: z
-            .object({
-              id: z.string(),
-              slug: z.string(),
-              name: z.string(),
-              imageUrl: z.string(),
-              price: z.number(),
-              stock: z.number(),
-              description: z.string(),
-              createdAt: z.date(),
-              updatedAt: z.date(),
-            })
-            .array(),
-        },
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/products",
+    responses: {
+      200: {
+        description: "Get all products",
+        content: { "application/json": { schema: ProductsSchema } },
       },
     },
-  },
-});
+  }),
+  async (c) => {
+    const products = await db.product.findMany();
 
-app.openapi(getProductsRoute, async (c) => {
-  const products = await db.product.findMany();
-
-  return c.json(products);
-});
+    return c.json(products);
+  }
+);
 
 app.doc("/openapi.json", {
   openapi: "3.0.0",
