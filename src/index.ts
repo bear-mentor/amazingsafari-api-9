@@ -1,17 +1,12 @@
 import { cors } from "hono/cors";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { Scalar } from "@scalar/hono-api-reference";
 
 import { db } from "./lib/db";
 
 const app = new OpenAPIHono();
 
 app.use(cors());
-
-app.get("/", (c) => {
-  return c.json({
-    title: "Amazing Safari API",
-  });
-});
 
 const getProductsRoute = createRoute({
   method: "get",
@@ -53,5 +48,13 @@ app.doc("/openapi.json", {
     version: "1.0.0",
   },
 });
+
+app.get(
+  "/",
+  Scalar({
+    pageTitle: "Amazing Safari API",
+    url: "/openapi.json",
+  })
+);
 
 export default app;
