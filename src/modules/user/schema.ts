@@ -8,6 +8,14 @@ export const UserSchema = z.object({
   updatedAt: z.date(),
 });
 
+export const PrivateUserSchema = UserSchema.extend({
+  email: z.string(),
+});
+
+export type User = z.infer<typeof UserSchema>;
+
+export type PrivateUser = z.infer<typeof PrivateUserSchema>;
+
 export const UsersSchema = z.array(UserSchema);
 
 export const UserIdParamSchema = z.object({
