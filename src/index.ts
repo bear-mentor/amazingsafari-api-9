@@ -144,11 +144,14 @@ app.openapi(
     const body = c.req.valid("json");
 
     try {
+      const hash = await Bun.password.hash(body.password);
+
       const user = await db.user.create({
         data: {
           username: body.username,
           email: body.email,
           fullName: body.fullName,
+          password: { create: { hash } },
         },
       });
 
