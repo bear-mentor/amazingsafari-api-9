@@ -1,6 +1,7 @@
 import { cors } from "hono/cors";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
+import { sign, verify } from "hono/jwt";
 
 import { db } from "./lib/db";
 import {
@@ -217,10 +218,14 @@ app.openapi(
         });
       }
 
-      console.log({ user, isMatch });
+      const payload = {
+        sub: user.id,
+        exp: Math.floor(Date.now() / 1000) + 60 * 5, // Expires in 5 minutes
+      };
 
-      // TODO
-      const token = "...";
+      const tokenSecretKey = String(process.env.TOKEN_SECRET_KEY);
+
+      const token = await sign(payload, tokenSecretKey);
 
       return c.json(token);
     } catch (error) {
