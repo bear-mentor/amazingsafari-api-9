@@ -9,7 +9,9 @@ import {
   ProductsSchema,
 } from "./modules/product/schema";
 import {
+  LoginUserSchema,
   RegisterUserSchema,
+  TokenSchema,
   UserIdParamSchema,
   UserSchema,
   UsersSchema,
@@ -163,6 +165,50 @@ app.openapi(
 );
 
 // POST /auth/login
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/auth/login",
+    request: {
+      body: { content: { "application/json": { schema: LoginUserSchema } } },
+    },
+    responses: {
+      200: {
+        description: "Logged in to user",
+        content: { "application/json": { schema: TokenSchema } },
+      },
+      400: {
+        description: "Failed to login user",
+      },
+      404: {
+        description: "User not found",
+      },
+    },
+  }),
+  async (c) => {
+    const body = c.req.valid("json");
+
+    try {
+      const user = await db.user.findUnique({
+        where: { email: body.email },
+      });
+
+      if (!user) {
+        return c.notFound();
+      }
+
+      console.log({ user });
+
+      // TODO
+      const token = "...";
+
+      return c.json(token);
+    } catch (error) {
+      return c.json({ message: "Email or password is incorrect" }, 400);
+    }
+  }
+);
+
 // GET /auth/me
 
 app.doc("/openapi.json", {
