@@ -13,3 +13,9 @@ export const UsersSchema = z.array(UserSchema);
 export const UserIdParamSchema = z.object({
   id: z.string(),
 });
+
+export const RegisterUserSchema = z.object({
+  username: z.string(),
+  email: z.string(),
+  fullName: z.string(),
+});

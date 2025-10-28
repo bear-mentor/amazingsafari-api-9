@@ -9,6 +9,7 @@ import {
   ProductsSchema,
 } from "./modules/product/schema";
 import {
+  RegisterUserSchema,
   UserIdParamSchema,
   UserSchema,
   UsersSchema,
@@ -54,7 +55,9 @@ app.openapi(
   async (c) => {
     const { slug } = c.req.valid("param");
 
-    const product = await db.product.findUnique({ where: { slug } });
+    const product = await db.product.findUnique({
+      where: { slug },
+    });
 
     if (!product) {
       return c.notFound();
@@ -76,7 +79,11 @@ app.openapi(
     },
   }),
   async (c) => {
-    const users = await db.user.findMany();
+    const users = await db.user.findMany({
+      omit: {
+        email: true,
+      },
+    });
 
     return c.json(users);
   }
@@ -100,7 +107,12 @@ app.openapi(
   async (c) => {
     const { id } = c.req.valid("param");
 
-    const user = await db.user.findUnique({ where: { id } });
+    const user = await db.user.findUnique({
+      where: { id },
+      omit: {
+        email: true,
+      },
+    });
 
     if (!user) {
       return c.notFound();
@@ -111,6 +123,35 @@ app.openapi(
 );
 
 // POST /auth/register
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/auth/register",
+    request: {
+      body: { content: { "application/json": { schema: RegisterUserSchema } } },
+    },
+    responses: {
+      201: {
+        description: "Registered new user",
+        content: { "application/json": { schema: UserSchema } },
+      },
+    },
+  }),
+  async (c) => {
+    const body = c.req.valid("json");
+
+    const user = await db.user.create({
+      data: {
+        username: body.username,
+        email: body.email,
+        fullName: body.fullName,
+      },
+    });
+
+    return c.json(user);
+  }
+);
+
 // POST /auth/login
 // GET /auth/me
 
