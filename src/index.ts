@@ -135,20 +135,27 @@ app.openapi(
         description: "Registered new user",
         content: { "application/json": { schema: UserSchema } },
       },
+      400: {
+        description: "Failed to register new user",
+      },
     },
   }),
   async (c) => {
     const body = c.req.valid("json");
 
-    const user = await db.user.create({
-      data: {
-        username: body.username,
-        email: body.email,
-        fullName: body.fullName,
-      },
-    });
+    try {
+      const user = await db.user.create({
+        data: {
+          username: body.username,
+          email: body.email,
+          fullName: body.fullName,
+        },
+      });
 
-    return c.json(user);
+      return c.json(user, 201);
+    } catch (error) {
+      return c.json({ message: "Username or email already exist" }, 400);
+    }
   }
 );
 
