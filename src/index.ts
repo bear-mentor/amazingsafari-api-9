@@ -1,7 +1,6 @@
 import { cors } from "hono/cors";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
-import { sign, verify } from "hono/jwt";
 
 import { db } from "./lib/db";
 import {
