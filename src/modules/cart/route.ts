@@ -1,6 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { checkAuthorized } from "../auth/middleware";
-import { CartItemSchema, CartSchema } from "./schema";
+import { AddCartItemSchema, CartItemSchema, CartSchema } from "./schema";
 import { db } from "../../lib/db";
 
 export const cartRoute = new OpenAPIHono();
@@ -45,6 +45,9 @@ cartRoute.openapi(
     method: "put",
     path: "/items",
     middleware: checkAuthorized,
+    request: {
+      body: { content: { "application/json": { schema: AddCartItemSchema } } },
+    },
     responses: {
       200: {
         description: "Add item to user's cart",
@@ -57,6 +60,7 @@ cartRoute.openapi(
   }),
   async (c) => {
     const user = c.get("user");
+    const body = c.req.valid("json");
 
     const cart = await db.cart.findUnique({
       where: { userId: user.id },
@@ -67,11 +71,16 @@ cartRoute.openapi(
       return c.notFound();
     }
 
+    // Only create new cart item,
+    // if the product doesn't exist yet in the cart items
     const newCartItem = await db.cartItem.create({
       data: {
         cartId: cart.id,
-        productId: "",
-        quantity: 1,
+        productId: body.productId,
+        quantity: body.quantity,
+      },
+      include: {
+        product: true,
       },
     });
 

@@ -26,3 +26,8 @@ export const CartSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
 });
+
+export const AddCartItemSchema = z.object({
+  productId: z.string(),
+  quantity: z.number().int(),
+});
