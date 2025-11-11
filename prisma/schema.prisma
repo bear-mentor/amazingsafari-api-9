@@ -19,6 +19,8 @@ model Product {
   stock       Int
   description String @db.Text
 
+  cartItems CartItem[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -62,6 +64,11 @@ model CartItem {
 
   cart   Cart   @relation(fields: [cartId], references: [id])
   cartId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  quantity Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
