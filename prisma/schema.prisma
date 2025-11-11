@@ -33,6 +33,7 @@ model User {
   fullName String
 
   password Password?
+  cart     Cart?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -52,6 +53,9 @@ model Password {
 
 model Cart {
   id String @id @default(ulid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 
   items CartItem[]
 
