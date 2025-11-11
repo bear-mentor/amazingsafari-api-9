@@ -20,67 +20,14 @@ import {
 import { signToken } from "./lib/token";
 import { checkAuthorized } from "./modules/auth/middleware";
 import { productRoute } from "./modules/product/route";
+import { userRoute } from "./modules/user/route";
 
 const app = new OpenAPIHono();
 
 app.use(cors());
 
 app.route("/products", productRoute);
-
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/users",
-    responses: {
-      200: {
-        description: "Get all users",
-        content: { "application/json": { schema: UsersSchema } },
-      },
-    },
-  }),
-  async (c) => {
-    const users = await db.user.findMany({
-      omit: {
-        email: true,
-      },
-    });
-
-    return c.json(users);
-  }
-);
-
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/users/{id}",
-    request: { params: UserIdParamSchema },
-    responses: {
-      200: {
-        description: "Get one user by ID",
-        content: { "application/json": { schema: UserSchema } },
-      },
-      404: {
-        description: "User by id not found",
-      },
-    },
-  }),
-  async (c) => {
-    const { id } = c.req.valid("param");
-
-    const user = await db.user.findUnique({
-      where: { id },
-      omit: {
-        email: true,
-      },
-    });
-
-    if (!user) {
-      return c.notFound();
-    }
-
-    return c.json(user);
-  }
-);
+app.route("/users", userRoute);
 
 // POST /auth/register
 app.openapi(
