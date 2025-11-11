@@ -19,58 +19,13 @@ import {
 } from "./modules/user/schema";
 import { signToken } from "./lib/token";
 import { checkAuthorized } from "./modules/auth/middleware";
+import { productRoute } from "./modules/product/route";
 
 const app = new OpenAPIHono();
 
 app.use(cors());
 
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/products",
-    responses: {
-      200: {
-        description: "Get all products",
-        content: { "application/json": { schema: ProductsSchema } },
-      },
-    },
-  }),
-  async (c) => {
-    const products = await db.product.findMany();
-
-    return c.json(products);
-  }
-);
-
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/products/{slug}",
-    request: { params: ProductSlugParamSchema },
-    responses: {
-      200: {
-        description: "Get one product by slug",
-        content: { "application/json": { schema: ProductSchema } },
-      },
-      404: {
-        description: "Product by slug not found",
-      },
-    },
-  }),
-  async (c) => {
-    const { slug } = c.req.valid("param");
-
-    const product = await db.product.findUnique({
-      where: { slug },
-    });
-
-    if (!product) {
-      return c.notFound();
-    }
-
-    return c.json(product);
-  }
-);
+app.route("/products", productRoute);
 
 app.openapi(
   createRoute({
